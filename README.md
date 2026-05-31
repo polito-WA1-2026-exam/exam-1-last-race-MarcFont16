@@ -22,9 +22,12 @@
 
 ## Database Tables
 
-- Table `users` - contains xx yy zz
-- Table `something` - contains ww qq ss
-- ...
+- Table `Users` - stores user credentials (username and hashed passwords) for authentication.
+- Table `Stations` - contains the details of each metro station (id, name, and a boolean indicating if it is an interchange).
+- Table `Lines` - stores the available metro lines (name and color).
+- Table `Connections` - represents the graph segments connecting two stations directly, linked to a specific line.
+- Table `Events` - contains the random events that can occur during a trip, including their text description and effect on coins.
+- Table `Games` - stores the history of played games, including the user, assigned start/end stations, final score, and time left for ranking tie-breakers.
 
 ## Main React Components
 
