@@ -9,16 +9,9 @@
 
 ## API Server
 
-- POST `/api/something`
-  - request parameters and request body content
-  - response body content
-- GET `/api/something`
-  - request parameters
-  - response body content
-- POST `/api/something`
-  - request parameters and request body content
-  - response body content
-- ...
+- GET `/api/network`
+  - request parameters: none
+  - response body content: an object containing three arrays (`stations`, `lines`, `connections`) representing the full underground network.
 
 ## Database Tables
 
