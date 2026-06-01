@@ -10,17 +10,17 @@ import { getDistance } from "./utils.js";
 const app = new express();
 const port = 3001;
 
-// parse json requests
+// parse json
 app.use(express.json());
 
-// configure session
+// session config
 app.use(session({
   secret: "last-race-secret",
   resave: false,
   saveUninitialized: false
 }));
 
-// configure passport local strategy
+// passport strategy
 passport.use(new LocalStrategy(async (username, password, done) => {
   try {
     const user = await getUser(username, password);
@@ -31,17 +31,17 @@ passport.use(new LocalStrategy(async (username, password, done) => {
   }
 }));
 
-// serialize user into session
+// serialize
 passport.serializeUser((user, done) => {
   done(null, { id: user.id, username: user.username });
 });
 
-// deserialize user from session
+// deserialize
 passport.deserializeUser((user, done) => {
   done(null, user);
 });
 
-// initialize passport middlewares
+// middlewares
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -50,7 +50,7 @@ app.post("/api/sessions", passport.authenticate("local"), (req, res) => {
   res.status(201).json(req.user);
 });
 
-// get current user
+// current user
 app.get("/api/sessions/current", (req, res) => {
   if (req.isAuthenticated()) {
     res.json(req.user);
@@ -66,20 +66,33 @@ app.delete("/api/sessions/current", (req, res) => {
   });
 });
 
-// get full metro network
+// network data
 app.get("/api/network", async (req, res) => {
   try {
     const stations = await getStations();
     const lines = await getLines();
     const connections = await getConnections();
     
-    res.json({ stations, lines, connections });
+    // build network with stations grouped by line and de-duplicated
+    const network = {
+      lines: lines.map(line => ({
+        ...line,
+        stations: Array.from(new Map(
+          stations
+            .filter(s => s.line_id === line.id)
+            .map(s => [s.id, s])
+        ).values())
+      })),
+      connections
+    };
+    
+    res.json(network);
   } catch (err) {
     res.status(500).json({ error: "failed to retrieve network data" });
   }
 });
 
-// setup game
+// game setup
 app.get("/api/game/setup", async (req, res) => {
   try {
     const stations = await getStations();
@@ -87,7 +100,7 @@ app.get("/api/game/setup", async (req, res) => {
     
     let start, end, dist;
     
-    // retry until distance is at least 3
+    // ensure distance >= 3
     do {
       start = stations[Math.floor(Math.random() * stations.length)];
       end = stations[Math.floor(Math.random() * stations.length)];
@@ -100,7 +113,7 @@ app.get("/api/game/setup", async (req, res) => {
   }
 });
 
-// activate the server
+// start server
 app.listen(port, () => {
-  console.log(`Server listening at http://localhost:${port}`);
+  console.log(`server listening at http://localhost:${port}`);
 });

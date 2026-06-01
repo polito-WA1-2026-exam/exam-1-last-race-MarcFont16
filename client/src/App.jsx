@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate, Link, useNavigate } from "react-router-dom";
 import "./App.css";
+import GameContainer from './components/GameContainer';
 
 // temporary placeholder components
 const HomePage = () => (
@@ -71,7 +72,6 @@ const LoginForm = ({ setUser }) => {
   );
 };
 
-const GameContainer = () => <div><h2>game container (protected)</h2></div>;
 const RankingPage = () => <div><h2>ranking (protected)</h2></div>;
 
 function App() {
@@ -104,7 +104,7 @@ function App() {
         {/* protected routes */}
         <Route 
           path="/game" 
-          element={user ? <GameContainer /> : <Navigate to="/login" />} 
+          element={user ? <GameContainer user={user} /> : <Navigate to="/login" />} 
         />
         <Route 
           path="/ranking" 

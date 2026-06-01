@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
+import NetworkMap from './NetworkMap';
 
 const GameContainer = ({ user }) => {
   const [network, setNetwork] = useState(null);
   const [mission, setMission] = useState(null);
+  const [currentPosition, setCurrentPosition] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // fetch network and setup data in parallel
     Promise.all([
       fetch("/api/network").then(res => {
         if (!res.ok) throw new Error("network fetch failed");
@@ -21,18 +22,19 @@ const GameContainer = ({ user }) => {
       .then(([networkData, setupData]) => {
         setNetwork(networkData);
         setMission(setupData);
+        setCurrentPosition(setupData.start);
         setLoading(false);
       })
       .catch((err) => {
-        // handle unhandled rejections as per exam rules
         console.error(err);
-        setError("Connection to the control center lost. Please try again.");
+        setError("Connection to the control center lost.");
         setLoading(false);
       });
   }, []);
 
-  if (loading) return <div>loading...</div>;
+  if (loading) return <div>loading control center...</div>;
   if (error) return <div style={{ color: "red" }}>{error}</div>;
+  if (!network || !mission || !currentPosition) return <div>initializing system...</div>;
 
   return (
     <div style={{ padding: "20px" }}>
@@ -41,17 +43,16 @@ const GameContainer = ({ user }) => {
       <div style={{ background: "#222", padding: "15px", borderRadius: "8px", marginBottom: "20px" }}>
         <h3>Current Mission:</h3>
         <p>Travel from <strong>{mission.start.name}</strong> to <strong>{mission.end.name}</strong></p>
+        <p>Current location: <strong>{currentPosition.name}</strong></p>
       </div>
 
-      <div>
-        <p>
-          <em>Map data loaded into memory: {network.stations.length} stations, {network.lines.length} lines, and {network.connections.length} connections.</em>
-        </p>
-      </div>
-
-      {/* map placeholder */}
-      <div style={{ border: "1px dashed gray", height: "400px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        [ Interactive Map Area ]
+      <div style={{ border: "1px dashed gray", minHeight: "400px", marginTop: "20px" }}>
+        <NetworkMap 
+          network={network} 
+          mission={mission} 
+          currentPosition={currentPosition} 
+          onMove={(station) => setCurrentPosition(station)} 
+        />
       </div>
     </div>
   );
