@@ -1,5 +1,5 @@
-# Exam #N: "Exam Title"
-## Student: s123456 LASTNAME FIRSTNAME 
+# Exam #1: "Last Race"
+## Student: 363159 FONT RUANA MARC 
 
 ## React Client Application Routes
 
@@ -12,6 +12,19 @@
 - GET `/api/network`
   - request parameters: none
   - response body content: an object containing three arrays (`stations`, `lines`, `connections`) representing the full underground network.
+- GET `/api/game/setup`
+  - request parameters: none
+  - response body content: an object containing `start` and `end` station objects, guaranteed to be at least 3 stops apart.
+- POST `/api/sessions`
+  - request parameters: none
+  - request body content: JSON object with `username` and `password`.
+  - response body content: the authenticated user object (`id`, `username`).
+- GET `/api/sessions/current`
+  - request parameters: none
+  - response body content: the currently logged-in user object if a session exists.
+- DELETE `/api/sessions/current`
+  - request parameters: none
+  - response body content: a confirmation message of successful logout.
 
 ## Database Tables
 
@@ -36,8 +49,9 @@
 
 ## Users Credentials
 
-- username, password (plus any other requested info)
-- username, password (plus any other requested info)
+- marcfont, hash_1
+- professor, hash_2
+- guest, hash_3
 
 ## Use of AI Tools
 Briefly describe whether you used any AI tools (e.g., ChatGPT, GitHub Copilot, Claude) while working on this project, for which purposes (e.g., clarifying concepts, debugging, generating code), and how you verified or adapted their output.

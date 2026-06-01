@@ -39,3 +39,13 @@ export const getEvents = () => {
     });
   });
 };
+
+// get user by username and password
+export const getUser = (username, password) => {
+  return new Promise((resolve, reject) => {
+    db.get('SELECT * FROM Users WHERE username = ? AND password = ?', [username, password], (err, row) => {
+      if (err) reject(err);
+      else resolve(row);
+    });
+  });
+};
