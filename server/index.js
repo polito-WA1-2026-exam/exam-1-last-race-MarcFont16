@@ -1,6 +1,7 @@
 // imports
 import express from "express";
 import { getStations, getLines, getConnections } from "./dao.js";
+import { getDistance } from "./utils.js";
 
 // init express
 const app = new express();
@@ -19,6 +20,27 @@ app.get("/api/network", async (req, res) => {
     res.json({ stations, lines, connections });
   } catch (err) {
     res.status(500).json({ error: "failed to retrieve network data" });
+  }
+});
+
+// setup game
+app.get("/api/game/setup", async (req, res) => {
+  try {
+    const stations = await getStations();
+    const connections = await getConnections();
+    
+    let start, end, dist;
+    
+    // retry until distance is at least 3
+    do {
+      start = stations[Math.floor(Math.random() * stations.length)];
+      end = stations[Math.floor(Math.random() * stations.length)];
+      dist = getDistance(start.id, end.id, connections);
+    } while (dist < 3);
+
+    res.json({ start, end });
+  } catch (err) {
+    res.status(500).json({ error: "failed to setup game" });
   }
 });
 
