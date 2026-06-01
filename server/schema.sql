@@ -41,7 +41,8 @@ CREATE TABLE Events (
 CREATE TABLE Users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT UNIQUE NOT NULL,
-    password TEXT NOT NULL 
+    password TEXT NOT NULL,
+    salt TEXT NOT NULL
 );
 
 -- games table
@@ -55,12 +56,6 @@ CREATE TABLE Games (
     played_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES Users(id)
 );
-
--- seed users
-INSERT INTO Users (username, password) VALUES 
-('marcfont', 'hash_1'),
-('professor', 'hash_2'),
-('guest', 'hash_3');
 
 -- seed games
 INSERT INTO Games (user_id, start_station_id, end_station_id, score, time_left) VALUES 
