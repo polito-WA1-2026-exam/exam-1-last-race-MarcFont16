@@ -1,6 +1,8 @@
 // imports
 import express from "express";
 import session from "express-session";
+import passport from "passport";
+import LocalStrategy from "passport-local";
 import { getStations, getLines, getConnections, getUser } from "./dao.js";
 import { getDistance } from "./utils.js";
 
@@ -18,25 +20,40 @@ app.use(session({
   saveUninitialized: false
 }));
 
-// login
-app.post("/api/sessions", async (req, res) => {
-  const { username, password } = req.body;
+// configure passport local strategy
+passport.use(new LocalStrategy(async (username, password, done) => {
   try {
     const user = await getUser(username, password);
-    if (!user) {
-      return res.status(401).json({ error: "invalid credentials" });
-    }
-    req.session.user = { id: user.id, username: user.username };
-    res.status(201).json(req.session.user);
+    if (!user) return done(null, false, { message: "invalid credentials" });
+    return done(null, user);
   } catch (err) {
-    res.status(500).json({ error: "login failed" });
+    return done(err);
   }
+}));
+
+// serialize user into session
+passport.serializeUser((user, done) => {
+  done(null, { id: user.id, username: user.username });
+});
+
+// deserialize user from session
+passport.deserializeUser((user, done) => {
+  done(null, user);
+});
+
+// initialize passport middlewares
+app.use(passport.initialize());
+app.use(passport.session());
+
+// login
+app.post("/api/sessions", passport.authenticate("local"), (req, res) => {
+  res.status(201).json(req.user);
 });
 
 // get current user
 app.get("/api/sessions/current", (req, res) => {
-  if (req.session.user) {
-    res.json(req.session.user);
+  if (req.isAuthenticated()) {
+    res.json(req.user);
   } else {
     res.status(401).json({ error: "not authenticated" });
   }
@@ -44,7 +61,7 @@ app.get("/api/sessions/current", (req, res) => {
 
 // logout
 app.delete("/api/sessions/current", (req, res) => {
-  req.session.destroy(() => {
+  req.logout(() => {
     res.status(200).json({ message: "logged out" });
   });
 });
