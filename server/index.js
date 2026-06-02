@@ -3,7 +3,7 @@ import express from "express";
 import session from "express-session";
 import passport from "passport";
 import LocalStrategy from "passport-local";
-import { getStations, getLines, getConnections, getUser } from "./dao.js";
+import { getStations, getLines, getConnections, getEvents, getUser, getRanking, saveGame } from "./dao.js";
 import { getDistance } from "./utils.js";
 
 // init express
@@ -110,6 +110,101 @@ app.get("/api/game/setup", async (req, res) => {
     res.json({ start, end });
   } catch (err) {
     res.status(500).json({ error: "failed to setup game" });
+  }
+});
+
+// validate route
+app.post("/api/games/:id/route", async (req, res) => {
+  try {
+    const { route, endId } = req.body;
+    const connections = await getConnections();
+    const allEvents = await getEvents();
+    
+    let coins = 20;
+    let eventsLog = [];
+    let isValid = true;
+    let currentLineId = null;
+
+    // validate each segment
+    for (let i = 0; i < route.length - 1; i++) {
+      const from = route[i];
+      const to = route[i + 1];
+      
+      // check connection in db
+      const segment = connections.find(c => 
+        (c.station_from_id === from.id && c.station_to_id === to.id) ||
+        (c.station_from_id === to.id && c.station_to_id === from.id)
+      );
+
+      if (!segment) {
+        isValid = false;
+        break;
+      }
+
+      // check valid interchange
+      if (currentLineId && currentLineId !== segment.line_id) {
+        if (!from.isInterchange) {
+          isValid = false;
+          break;
+        }
+      }
+      currentLineId = segment.line_id;
+
+      // apply random event
+      const event = allEvents[Math.floor(Math.random() * allEvents.length)];
+      coins += event.effect;
+      eventsLog.push({
+        stationName: to.name,
+        description: event.description,
+        effect: event.effect > 0 ? `+${event.effect}` : `${event.effect}`
+      });
+    }
+
+    // check if route actually reached destination
+    if (isValid && route[route.length - 1].id !== Number(endId)) {
+      isValid = false;
+    }
+
+    // apply official scoring rules
+    if (!isValid) {
+      coins = 0;
+      eventsLog = [{ stationName: "COMMAND CENTER", description: "CRITICAL ERROR: Route is invalid or incomplete.", effect: "-20" }];
+    } else {
+      coins += 10;
+      eventsLog.push({ stationName: "COMMAND CENTER", description: "ARRIVAL BONUS: Destination reached successfully.", effect: "+10" });
+    }
+
+    // return result
+    res.json({ coins: Math.max(0, coins), eventsLog, isValid });
+  } catch (err) {
+    res.status(500).json({ error: "validation failed" });
+  }
+});
+
+// save game
+app.post("/api/games", async (req, res) => {
+  // check auth
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ error: "not authenticated" });
+  }
+  
+  const { startStationId, endStationId, score, timeLeft } = req.body;
+  
+  try {
+    const gameId = await saveGame(req.user.id, startStationId, endStationId, score, timeLeft);
+    res.status(201).json({ message: "game saved", id: gameId });
+  } catch (err) {
+    res.status(500).json({ error: "failed to save game" });
+  }
+});
+
+// ranking data
+app.get("/api/ranking", async (req, res) => {
+  try {
+    const ranking = await getRanking();
+    res.json(ranking);
+  } catch (err) {
+    res.status(500).json({ error: "failed to retrieve ranking" });
   }
 });
 

@@ -69,3 +69,38 @@ export const getUser = (username, password) => {
     });
   });
 };
+
+// get top 10 scores resolving ties correctly
+export const getRanking = () => {
+  return new Promise((resolve, reject) => {
+    const sql = `
+      SELECT u.username, g.score as max_score, g.time_left
+      FROM Users u
+      JOIN Games g ON u.id = g.user_id
+      WHERE g.id = (
+        SELECT id 
+        FROM Games g2 
+        WHERE g2.user_id = u.id 
+        ORDER BY score DESC, time_left DESC 
+        LIMIT 1
+      )
+      ORDER BY max_score DESC, g.time_left DESC
+      LIMIT 10
+    `;
+    db.all(sql, [], (err, rows) => {
+      if (err) reject(err);
+      else resolve(rows);
+    });
+  });
+};
+
+// save finished game
+export const saveGame = (userId, startStationId, endStationId, score, timeLeft) => {
+  return new Promise((resolve, reject) => {
+    const sql = `INSERT INTO Games (user_id, start_station_id, end_station_id, score, time_left) VALUES (?, ?, ?, ?, ?)`;
+    db.run(sql, [userId, startStationId, endStationId, score, timeLeft], function(err) {
+      if (err) reject(err);
+      else resolve(this.lastID);
+    });
+  });
+};

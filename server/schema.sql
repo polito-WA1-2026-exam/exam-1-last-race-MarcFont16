@@ -53,9 +53,15 @@ CREATE TABLE Games (
     end_station_id INTEGER,
     score INTEGER DEFAULT 0,
     time_left INTEGER,
-    played_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    played_at DATETIME DEFAULT (datetime('now', 'localtime')),
     FOREIGN KEY (user_id) REFERENCES Users(id)
 );
+
+-- seed users
+INSERT INTO Users (id, username, password, salt) VALUES 
+(1, 'guest', 'a214b36e5e7b7d1e5b3c9ebc404fee66a8e09eaeb42aa4050088732dd9dc415c', 'd3b1f9bcde254441dadf98943a800383'),
+(2, 'professor', '6c3c8b03489fc8ae79097aa6139cd70c56e1e545e3b0bec72a021588f11f31f5', '49f50ff6e26d30a54fb4811cad60ac8c'),
+(3, 'marcfont', 'e85b8e82c8d4c69c5fe5b034562a45a31f601b7cbb0d558bb939e30a2a550813', '9150fce381c0abe2bd1802502f2f6ff8');
 
 -- seed games
 INSERT INTO Games (user_id, start_station_id, end_station_id, score, time_left) VALUES 
