@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import NetworkMap from './NetworkMap';
+import { API_URL } from '../config';
 
 // main game controller
 const GameContainer = ({ user }) => {
@@ -27,8 +28,9 @@ const GameContainer = ({ user }) => {
   // fetch initial data
   useEffect(() => {
     Promise.all([
-      fetch("/api/network").then(res => res.json()), 
-      fetch("/api/game/setup").then(res => res.json())
+      // absolute urls via config
+      fetch(`${API_URL}/network`).then(res => res.json()), 
+      fetch(`${API_URL}/game/setup`).then(res => res.json())
     ])
       .then(([networkData, setupData]) => {
         setNetwork(networkData);
@@ -36,7 +38,7 @@ const GameContainer = ({ user }) => {
         setRoute([setupData.start]); 
         setLoading(false);
       })
-      .catch(() => setError("Connection lost."));
+      .catch(() => setError("connection lost."));
   }, []);
 
   // planning timer
@@ -114,11 +116,11 @@ const GameContainer = ({ user }) => {
     setCurrentStep(-1); 
 
     try {
-      // send route for official validation
-      const res = await fetch(`/api/games/1/route`, {
+      // send route for official validation using api_url
+      const res = await fetch(`${API_URL}/games/route`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: "include",
+        credentials: "include", // required for cross-origin sessions
         body: JSON.stringify({ route, endId: mission.end.id })
       });
       const result = await res.json();
@@ -129,10 +131,10 @@ const GameContainer = ({ user }) => {
 
       // save match to db if valid
       if (result.isValid) {
-        const saveRes = await fetch("/api/games", {
+        const saveRes = await fetch(`${API_URL}/games`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          credentials: "include",
+          credentials: "include", // required to authenticate the save request
           body: JSON.stringify({
             startStationId: mission.start.id,
             endStationId: mission.end.id,
@@ -151,12 +153,12 @@ const GameContainer = ({ user }) => {
 
     } catch (err) {
       console.error(err);
-      setError("Mission validation failed.");
+      setError("mission validation failed.");
     }
   };
 
   // renders
-  if (loading) return <div style={styles.centered}><p style={styles.loadingText}>Loading Control Center...</p></div>;
+  if (loading) return <div style={styles.centered}><p style={styles.loadingText}>loading control center...</p></div>;
   if (error) return <div style={styles.centered}><p style={styles.errorText}>{error}</p></div>;
 
   return (
@@ -251,10 +253,10 @@ const GameContainer = ({ user }) => {
                 ))}
                 
                 {currentStep < eventsLog.length && currentStep >= 0 && (
-                  <div style={styles.awaitingText}>... Awaiting next transmission ...</div>
+                  <div style={styles.awaitingText}>... awaiting next transmission ...</div>
                 )}
                 {currentStep >= eventsLog.length && (
-                  <div style={styles.awaitingText}>... Calculating final official score ...</div>
+                  <div style={styles.awaitingText}>... calculating final official score ...</div>
                 )}
               </div>
             </div>
@@ -288,7 +290,7 @@ const GameContainer = ({ user }) => {
   );
 };
 
-// styling objects dynamically adapted for single-page layout
+// styles
 const styles = {
   container: {
     width: "100%",
