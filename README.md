@@ -29,7 +29,7 @@
   - Response body: JSON object containing `lines` (grouped with their `stations`) and `connections`.
 - `GET /api/game/setup`
   - Response body: JSON object with `start` and `end` station objects (guaranteed minimum distance of 3 stops).
-- `POST /api/games/1/route`
+- `POST /api/games/route`
   - Request body: JSON object with `route` (array of visited stations) and `endId`.
   - Response body: JSON object containing validation status (`isValid`), total calculated `coins`, and the detailed `eventsLog`.
 - `POST /api/games`
@@ -56,13 +56,13 @@
 ## Screenshot
 
 ### In-Game Execution
-![Game Execution](./img/game1.jpg)
-![Game Execution](./img/game2.jpg)
-![Game Execution](./img/game3.jpg)
-![Game Execution](./img/game4.jpg)
+![Game Execution](./img/game1.png)
+![Game Execution](./img/game2.png)
+![Game Execution](./img/game3.png)
+![Game Execution](./img/game4.png)
 
 ### Global Ranking
-![Global Ranking](./img/ranking.jpg)
+![Global Ranking](./img/ranking.png)
 
 ## Users Credentials
 
@@ -71,9 +71,11 @@
 - **Username:** guest | **Password:** password123
 
 ## Use of AI Tools
+
 AI tools (specifically a Large Language Model assistant) were utilized during the development of this project to accelerate debugging, optimize queries, and refine UI layouts. Key use cases included:
+
 1. **React State Management:** Troubleshooting `useEffect` lifecycle issues to prevent double-counting bugs during the point calculation animation (Strict Mode adaptations).
 2. **Database Optimization:** Refining complex SQLite queries for the Ranking system to ensure it correctly fetched the absolute maximum score per user while properly resolving ties.
-3. **UI/UX Styling:** Generating advanced CSS Flexbox structures to create a responsive, single-page application feel without vertical scrolling, and ensuring text overflow handling in the event logs.
+3. **UI/UX Styling:** Generating advanced CSS Flexbox structures and React inline `styles` objects to create a responsive, single-page application feel. The AI specifically assisted in designing the retro Barcelona metro aesthetic, ensuring a zero-scroll layout and proper text overflow handling in the event logs.
 
 All AI-generated snippets were thoroughly reviewed, tested against edge cases (such as route backtracking exploits), and manually adapted to strictly meet the architectural requirements of the exam.
