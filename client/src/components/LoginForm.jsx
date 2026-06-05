@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { API_URL } from '../config';
 
 // render retro login form
 const LoginForm = ({ setUser }) => {
@@ -13,9 +14,11 @@ const LoginForm = ({ setUser }) => {
     setError("");
     
     try {
-      const res = await fetch("/api/sessions", {
+      // using centralized api_url for absolute paths
+      const res = await fetch(`${API_URL}/sessions`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include", // required cross-origin passport session
         body: JSON.stringify({ username, password })
       });
       
@@ -45,7 +48,7 @@ const LoginForm = ({ setUser }) => {
               value={username} 
               onChange={(e) => setUsername(e.target.value)} 
               required 
-              onInvalid={(e) => e.target.setCustomValidity("Please fill out this field.")}
+              onInvalid={(e) => e.target.setCustomValidity("please fill out this field.")}
               onInput={(e) => e.target.setCustomValidity("")}
               style={styles.input}
               placeholder="e.g. Agent01"
@@ -77,7 +80,7 @@ const LoginForm = ({ setUser }) => {
         )}
         
         <div style={styles.footer}>
-          <Link to="/" style={styles.backLink}>[ Return to Terminal ]</Link>
+          <Link to="/" style={styles.backLink}>[ return to terminal ]</Link>
         </div>
       </div>
     </div>
@@ -93,7 +96,7 @@ const styles = {
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#e8dfd3", // vintage paper
+    backgroundColor: "#e8dfd3",
     fontFamily: "Georgia, 'Times New Roman', serif",
     padding: "30px",
     boxSizing: "border-box"
@@ -111,7 +114,7 @@ const styles = {
     flexDirection: "column"
   },
   title: {
-    color: "#a7192d", // deep red
+    color: "#a7192d",
     fontSize: "2.2rem",
     fontWeight: "normal",
     textTransform: "uppercase",
@@ -149,7 +152,7 @@ const styles = {
   input: {
     padding: "12px 15px",
     fontSize: "1.1rem",
-    fontFamily: "'Courier New', Courier, monospace", // typewriter feel
+    fontFamily: "'Courier New', Courier, monospace",
     backgroundColor: "#e8dfd3",
     border: "2px solid #2b221a",
     color: "#2b221a",
@@ -165,7 +168,7 @@ const styles = {
     textTransform: "uppercase",
     letterSpacing: "2px",
     border: "2px solid #2b221a",
-    boxShadow: "4px 4px 0px #a7192d", // red block shadow
+    boxShadow: "4px 4px 0px #a7192d",
     cursor: "pointer",
     marginTop: "15px",
     transition: "all 0.1s"

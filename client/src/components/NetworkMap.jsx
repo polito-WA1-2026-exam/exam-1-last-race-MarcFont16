@@ -1,4 +1,4 @@
-// render retro network map adapting to game phases
+// render network map
 const NetworkMap = ({ network, mission, route, gamePhase, onMove }) => {
   const currentPosition = route && route.length > 0 ? route[route.length - 1] : null;
 
@@ -6,9 +6,9 @@ const NetworkMap = ({ network, mission, route, gamePhase, onMove }) => {
     return <div style={styles.loading}>loading map...</div>;
   }
 
-  // check valid connection using db keys and prevent backtracking
+  // validate move and prevent backtracking
   const isValidMove = (targetStation) => {
-    // prevent revisiting stations to avoid point farming exploits
+    // block visited stations
     if (route.some(s => s.id === targetStation.id)) return false;
 
     return network.connections.some(
@@ -18,7 +18,7 @@ const NetworkMap = ({ network, mission, route, gamePhase, onMove }) => {
     );
   };
 
-  // helper to extract unique stations for the planning phase
+  // extract unique stations
   const getUniqueStations = () => {
     const stationMap = new Map();
     network.lines.forEach(line => {
@@ -26,11 +26,11 @@ const NetworkMap = ({ network, mission, route, gamePhase, onMove }) => {
         if (!stationMap.has(st.id)) stationMap.set(st.id, st);
       });
     });
-    // sort alphabetically to scramble their visual order
+    // sort alphabetically
     return Array.from(stationMap.values()).sort((a, b) => a.name.localeCompare(b.name));
   };
 
-  // helper to get all segments (pairs) for the planning phase
+  // extract all segments
   const getAllSegments = () => {
     const stationMap = new Map();
     network.lines.forEach(line => {
@@ -38,13 +38,13 @@ const NetworkMap = ({ network, mission, route, gamePhase, onMove }) => {
     });
 
     return network.connections.map(conn => {
-      const from = stationMap.get(conn.station_from_id) || "Unknown";
-      const to = stationMap.get(conn.station_to_id) || "Unknown";
+      const from = stationMap.get(conn.station_from_id) || "unknown";
+      const to = stationMap.get(conn.station_to_id) || "unknown";
       return `${from} ↔ ${to}`;
     });
   };
 
-  // reusable button renderer for both phases
+  // station button component
   const renderStationButton = (station) => {
     const isCurrent = station.id === currentPosition.id;
     const isEnd = station.id === mission.end.id;
@@ -86,7 +86,7 @@ const NetworkMap = ({ network, mission, route, gamePhase, onMove }) => {
     );
   };
 
-  // --- RENDER PLANNING PHASE (Scrambled Grid + Segments List) ---
+  // render planning phase
   if (gamePhase === "PLANNING" || gamePhase === "EXECUTION") {
     const uniqueStations = getUniqueStations();
     const allSegments = getAllSegments();
@@ -99,7 +99,7 @@ const NetworkMap = ({ network, mission, route, gamePhase, onMove }) => {
           {uniqueStations.map(station => renderStationButton(station))}
         </div>
 
-        {/* The segment list is explicitly required by the exam rules */}
+        {/* exam requirement: show segments */}
         <div style={styles.segmentsContainer}>
           <h4 style={styles.segmentsTitle}>Known Operational Segments</h4>
           <div style={styles.segmentsList}>
@@ -112,7 +112,7 @@ const NetworkMap = ({ network, mission, route, gamePhase, onMove }) => {
     );
   }
 
-  // --- RENDER SETUP / RESULT PHASE (Full Map with Lines) ---
+  // render setup and result phases
   return (
     <div style={styles.container}>
       <h3 style={styles.title}>Official Network Diagram</h3>
@@ -131,7 +131,7 @@ const NetworkMap = ({ network, mission, route, gamePhase, onMove }) => {
   );
 };
 
-// styling objects
+// styles
 const styles = {
   container: {
     width: "100%",

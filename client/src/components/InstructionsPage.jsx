@@ -29,16 +29,13 @@ const InstructionsPage = () => {
         <h3 style={styles.sectionTitle}>4. Scoring Rules</h3>
         <ul style={styles.list}>
           <li style={styles.listItem}>
-            <strong>Arrival Bonus:</strong> +10 coins if the last station of the validated route coincides exactly with the assigned destination station.
+            <strong>Valid Route:</strong> If the route is perfectly valid and reaches the exact destination, the final score will be the initial 20 coins plus or minus the sum of all random events encountered.
           </li>
           <li style={styles.listItem}>
-            <strong>Lost Penalty:</strong> -5 coins if time runs out or the user confirms the route early, and the last stop is not the destination.
+            <strong>Invalid or Incomplete Route:</strong> If the submitted route contains an illegal move, or fails to reach the assigned destination station before time runs out, the execution phase is skipped. The player loses all coins, obtaining a score of zero.
           </li>
           <li style={styles.listItem}>
-            <strong>Invalid Route:</strong> If the submitted route is invalid or incomplete, this phase is skipped and the player loses all 20 coins in their possession, obtaining a score of zero.
-          </li>
-          <li style={styles.listItem}>
-            <strong>Tie-breakers:</strong> If two players finish the game with the exact same coins, the tie in the ranking is broken by giving priority to speed (time left on the clock).
+            <strong>Tie-breakers:</strong> If two players finish the game with the exact same score, the tie in the global ranking is broken by giving priority to operational speed (time left on the clock).
           </li>
         </ul>
         
@@ -59,7 +56,6 @@ const InstructionsPage = () => {
 };
 
 // styles
-// ultra compact and maximum width styles
 const styles = {
   container: {
     flex: 1,
@@ -71,16 +67,16 @@ const styles = {
     backgroundColor: "#e8dfd3", 
     color: "#2b221a",
     fontFamily: "Georgia, 'Times New Roman', serif",
-    padding: "10px", // reduced outer padding
+    padding: "10px",
     boxSizing: "border-box"
   },
   documentFrame: {
-    width: "100%", // full width available
-    maxWidth: "1400px", // massive max-width for large monitors
+    width: "100%",
+    maxWidth: "1400px",
     border: "3px solid #2b221a",
     outline: "1px solid #2b221a",
     outlineOffset: "4px",
-    padding: "15px 25px", // reduced side padding to maximize text space
+    padding: "15px 25px",
     backgroundColor: "#f2ebd9", 
     boxShadow: "8px 8px 0px rgba(43, 34, 26, 0.1)",
     textAlign: "left"

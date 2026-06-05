@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { API_URL } from '../config';
 
 // render official global ranking
 const RankingPage = () => {
@@ -9,7 +10,7 @@ const RankingPage = () => {
 
   // fetch data on mount
   useEffect(() => {
-    fetch("/api/ranking")
+    fetch(`${API_URL}/ranking`)
       .then(res => {
         if (!res.ok) throw new Error("Network response was not ok");
         return res.json();
