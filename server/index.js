@@ -1,5 +1,6 @@
 // imports
 import express from "express";
+import cors from "cors"; 
 import session from "express-session";
 import passport from "passport";
 import LocalStrategy from "passport-local";
@@ -7,8 +8,15 @@ import { getStations, getLines, getConnections, getEvents, getUser, getRanking, 
 import { getDistance } from "./utils.js";
 
 // init express
-const app = new express();
+const app = express();
 const port = 3001;
+
+// cors config for frontend
+const corsOptions = {
+  origin: 'http://localhost:5173',
+  credentials: true
+};
+app.use(cors(corsOptions));
 
 // parse json
 app.use(express.json());
@@ -24,7 +32,7 @@ app.use(session({
 passport.use(new LocalStrategy(async (username, password, done) => {
   try {
     const user = await getUser(username, password);
-    if (!user) return done(null, false, { message: "invalid credentials" });
+    if (!user) return done(null, false, { message: "Invalid credentials" });
     return done(null, user);
   } catch (err) {
     return done(err);
@@ -55,14 +63,14 @@ app.get("/api/sessions/current", (req, res) => {
   if (req.isAuthenticated()) {
     res.json(req.user);
   } else {
-    res.status(401).json({ error: "not authenticated" });
+    res.status(401).json({ error: "Not authenticated" });
   }
 });
 
 // logout
 app.delete("/api/sessions/current", (req, res) => {
   req.logout(() => {
-    res.status(200).json({ message: "logged out" });
+    res.status(200).json({ message: "Logged out" });
   });
 });
 
@@ -73,7 +81,7 @@ app.get("/api/network", async (req, res) => {
     const lines = await getLines();
     const connections = await getConnections();
     
-    // build network with stations grouped by line and de-duplicated
+    // build network with grouped and de-duplicated stations
     const network = {
       lines: lines.map(line => ({
         ...line,
@@ -88,7 +96,7 @@ app.get("/api/network", async (req, res) => {
     
     res.json(network);
   } catch (err) {
-    res.status(500).json({ error: "failed to retrieve network data" });
+    res.status(500).json({ error: "Failed to retrieve network data" });
   }
 });
 
@@ -100,7 +108,7 @@ app.get("/api/game/setup", async (req, res) => {
     
     let start, end, dist;
     
-    // ensure distance >= 3
+    // ensure min distance
     do {
       start = stations[Math.floor(Math.random() * stations.length)];
       end = stations[Math.floor(Math.random() * stations.length)];
@@ -109,12 +117,12 @@ app.get("/api/game/setup", async (req, res) => {
 
     res.json({ start, end });
   } catch (err) {
-    res.status(500).json({ error: "failed to setup game" });
+    res.status(500).json({ error: "Failed to setup game" });
   }
 });
 
 // validate route
-app.post("/api/games/:id/route", async (req, res) => {
+app.post("/api/games/route", async (req, res) => {
   try {
     const { route, endId } = req.body;
     const connections = await getConnections();
@@ -124,12 +132,23 @@ app.post("/api/games/:id/route", async (req, res) => {
     let eventsLog = [];
     let isValid = true;
     let currentLineId = null;
+    let visitedSegments = new Set(); // track used segments
 
-    // validate each segment
+    // validate segments
     for (let i = 0; i < route.length - 1; i++) {
       const from = route[i];
       const to = route[i + 1];
       
+      // create direction-independent segment id (e.g., "4-5")
+      const segmentId = [from.id, to.id].sort((a, b) => a - b).join('-');
+
+      // fail if segment was already traversed
+      if (visitedSegments.has(segmentId)) {
+        isValid = false;
+        break;
+      }
+      visitedSegments.add(segmentId);
+
       // check connection in db
       const segment = connections.find(c => 
         (c.station_from_id === from.id && c.station_to_id === to.id) ||
@@ -160,24 +179,25 @@ app.post("/api/games/:id/route", async (req, res) => {
       });
     }
 
-    // check if route actually reached destination
+    // check destination reached
     if (isValid && route[route.length - 1].id !== Number(endId)) {
       isValid = false;
     }
 
-    // apply official scoring rules
+    // apply scoring rules strictly adhering to pdf
     if (!isValid) {
       coins = 0;
-      eventsLog = [{ stationName: "COMMAND CENTER", description: "CRITICAL ERROR: Route is invalid or incomplete.", effect: "-20" }];
-    } else {
-      coins += 10;
-      eventsLog.push({ stationName: "COMMAND CENTER", description: "ARRIVAL BONUS: Destination reached successfully.", effect: "+10" });
+      eventsLog = [{ 
+        stationName: "COMMAND CENTER", 
+        description: "CRITICAL ERROR: Route is invalid or incomplete. All coins lost.", 
+        effect: "0" 
+      }];
     }
 
     // return result
     res.json({ coins: Math.max(0, coins), eventsLog, isValid });
   } catch (err) {
-    res.status(500).json({ error: "validation failed" });
+    res.status(500).json({ error: "Validation failed" });
   }
 });
 
@@ -185,16 +205,16 @@ app.post("/api/games/:id/route", async (req, res) => {
 app.post("/api/games", async (req, res) => {
   // check auth
   if (!req.isAuthenticated()) {
-    return res.status(401).json({ error: "not authenticated" });
+    return res.status(401).json({ error: "Not authenticated" });
   }
   
   const { startStationId, endStationId, score, timeLeft } = req.body;
   
   try {
     const gameId = await saveGame(req.user.id, startStationId, endStationId, score, timeLeft);
-    res.status(201).json({ message: "game saved", id: gameId });
+    res.status(201).json({ message: "Game saved", id: gameId });
   } catch (err) {
-    res.status(500).json({ error: "failed to save game" });
+    res.status(500).json({ error: "Failed to save game" });
   }
 });
 
@@ -204,11 +224,11 @@ app.get("/api/ranking", async (req, res) => {
     const ranking = await getRanking();
     res.json(ranking);
   } catch (err) {
-    res.status(500).json({ error: "failed to retrieve ranking" });
+    res.status(500).json({ error: "Failed to retrieve ranking" });
   }
 });
 
 // start server
 app.listen(port, () => {
-  console.log(`server listening at http://localhost:${port}`);
+  console.log(`Server listening at http://localhost:${port}`);
 });
