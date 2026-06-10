@@ -151,7 +151,7 @@ const styles = {
     borderBottom: "1px dashed #d5c8b5"
   },
   td: {
-    padding: "6px 8px", // reduced
+    padding: "6px 8px",
     fontSize: "0.95rem",
     color: "#2b221a"
   },

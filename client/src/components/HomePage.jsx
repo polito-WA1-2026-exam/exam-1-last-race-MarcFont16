@@ -61,14 +61,14 @@ const styles = {
     boxSizing: "border-box"
   },
   posterFrame: {
-    width: "75%", // slightly reduced width
-    maxWidth: "850px", // lowered max width for better balance
+    width: "75%",
+    maxWidth: "850px",
     minHeight: "450px", 
     justifyContent: "center",
     border: "3px solid #2b221a",
     outline: "1px solid #2b221a",
     outlineOffset: "9px", 
-    padding: "65px 40px", // balanced internal space
+    padding: "65px 40px",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
@@ -102,7 +102,7 @@ const styles = {
   },
   title: {
     color: "#2b221a", 
-    fontSize: "5rem", // intermediate font size
+    fontSize: "5rem",
     fontWeight: "normal",
     textTransform: "uppercase",
     letterSpacing: "2px",
