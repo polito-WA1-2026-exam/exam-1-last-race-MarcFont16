@@ -48,7 +48,7 @@ const LoginForm = ({ setUser }) => {
               value={username} 
               onChange={(e) => setUsername(e.target.value)} 
               required 
-              onInvalid={(e) => e.target.setCustomValidity("please fill out this field.")}
+              onInvalid={(e) => e.target.setCustomValidity("Please fill out this field.")}
               onInput={(e) => e.target.setCustomValidity("")}
               style={styles.input}
               placeholder="e.g. Agent01"
@@ -62,7 +62,7 @@ const LoginForm = ({ setUser }) => {
               value={password} 
               onChange={(e) => setPassword(e.target.value)} 
               required 
-              onInvalid={(e) => e.target.setCustomValidity("please fill out this field.")}
+              onInvalid={(e) => e.target.setCustomValidity("Please fill out this field.")}
               onInput={(e) => e.target.setCustomValidity("")}
               style={styles.input}
             />

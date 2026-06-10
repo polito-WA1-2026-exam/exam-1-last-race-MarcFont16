@@ -98,6 +98,8 @@ export const getRanking = () => {
 export const saveGame = (userId, startStationId, endStationId, score, timeLeft) => {
   return new Promise((resolve, reject) => {
     const sql = `INSERT INTO Games (user_id, start_station_id, end_station_id, score, time_left) VALUES (?, ?, ?, ?, ?)`;
+    
+    // use regular 'function' because it allows access to this.lastID to return the newly inserted game's id
     db.run(sql, [userId, startStationId, endStationId, score, timeLeft], function(err) {
       if (err) reject(err);
       else resolve(this.lastID);

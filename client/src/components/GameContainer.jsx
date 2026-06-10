@@ -145,20 +145,20 @@ const GameContainer = ({ user }) => {
 
         if (!saveRes.ok) {
           const errorText = await saveRes.text();
-          console.error("error saving game to backend:", saveRes.status, errorText);
+          console.error("Error saving game to backend:", saveRes.status, errorText);
         } else {
-          console.log("game successfully saved to database!");
+          console.log("Game successfully saved to database!");
         }
       }
 
     } catch (err) {
       console.error(err);
-      setError("mission validation failed.");
+      setError("Mission validation failed.");
     }
   };
 
   // renders
-  if (loading) return <div style={styles.centered}><p style={styles.loadingText}>loading control center...</p></div>;
+  if (loading) return <div style={styles.centered}><p style={styles.loadingText}>Loading control center...</p></div>;
   if (error) return <div style={styles.centered}><p style={styles.errorText}>{error}</p></div>;
 
   return (

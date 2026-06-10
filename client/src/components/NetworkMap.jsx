@@ -3,7 +3,7 @@ const NetworkMap = ({ network, mission, route, gamePhase, onMove }) => {
   const currentPosition = route && route.length > 0 ? route[route.length - 1] : null;
 
   if (!network || !mission || !currentPosition) {
-    return <div style={styles.loading}>loading map...</div>;
+    return <div style={styles.loading}>Loading map...</div>;
   }
 
   // validate move and prevent backtracking
@@ -99,7 +99,7 @@ const NetworkMap = ({ network, mission, route, gamePhase, onMove }) => {
           {uniqueStations.map(station => renderStationButton(station))}
         </div>
 
-        {/* exam requirement: show segments */}
+        {/* show segments */}
         <div style={styles.segmentsContainer}>
           <h4 style={styles.segmentsTitle}>Known Operational Segments</h4>
           <div style={styles.segmentsList}>
