@@ -29,7 +29,7 @@ const GameContainer = ({ user }) => {
   useEffect(() => {
     Promise.all([
       // absolute urls via config
-      fetch(`${API_URL}/network`).then(res => res.json()), 
+      fetch(`${API_URL}/network`).then(res => res.json()),
       fetch(`${API_URL}/game/setup`).then(res => res.json())
     ])
       .then(([networkData, setupData]) => {
